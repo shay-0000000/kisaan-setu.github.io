@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="te">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>కిసాన్ సేతు - రిజిస్ట్రేషన్</title>
+    <style>
+        :root {
+            --primary: #1b5e20;
+            --secondary: #4caf50;
+            --bg: #f4f7f4;
+            --card: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: var(--bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 15px;
+        }
+
+        .reg-container {
+            background: var(--card);
+            width: 100%;
+            max-width: 420px;
+            padding: 35px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--primary);
+            margin: 10px 0;
+            font-size: 2rem;
+        }
+
+        p {
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 1rem;
+        }
+
+        .input-group {
+            text-align: left;
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 6px;
+            font-size: 1rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #eee;
+            border-radius: 10px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--secondary);
+            outline: none;
+            background: #f9fff9;
+        }
+
+        .btn-register {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(27, 94, 32, 0.2);
+        }
+
+        .btn-register:hover {
+            background: #2e7d32;
+            transform: translateY(-2px);
+        }
+
+        .footer-note {
+            margin-top: 20px;
+            font-size: 0.8rem;
+            color: #999;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="reg-container">
+        <div style="font-size: 3.5rem;">🌾</div>
+        <h1>కిసాన్ సేతు</h1>
+        <p>ముందుకు వెళ్లడానికి దయచేసి మీ వివరాలను నమోదు చేయండి</p>
+
+        <form id="regForm">
+            <div class="input-group">
+                <label>రైతు పేరు</label>
+                <input type="text" id="name" placeholder="మీ పూర్తి పేరు నమోదు చేయండి" required>
+            </div>
+
+            <div class="input-group">
+                <label>వయస్సు</label>
+                <input type="number" id="age" placeholder="ఉదాహరణకు: 45" required min="18" max="100">
+            </div>
+
+            <div class="input-group">
+                <label>ఫోన్ నంబర్</label>
+                <input type="tel" id="phone" placeholder="10 అంకెల మొబైల్ నంబర్" required pattern="[0-9]{10}">
+            </div>
+
+            <div class="input-group">
+                <label>పొలం పరిమాణం (ఎకరాల్లో)</label>
+                <input type="number" id="farmSize" step="0.1" placeholder="ఉదాహరణకు: 2.5" required>
+            </div>
+
+            <button type="submit" class="btn-register">నమోదు చేయండి మరియు ముందుకు వెళ్లండి</button>
+        </form>
+
+        <div class="footer-note">రైతుల సమాచారం సురక్షితంగా ఉంచబడుతుంది</div>
+    </div>
+
+    <script>
+        document.getElementById('regForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            // డేటాను లోకల్ స్టోరేజ్‌లో భద్రపరచడం
+            const data = {
+                name: document.getElementById('name').value,
+                age: document.getElementById('age').value,
+                phone: document.getElementById('phone').value,
+                farmSize: document.getElementById('farmSize').value
+            };
+            localStorage.setItem('farmerInfo', JSON.stringify(data));
+
+            // det_te.html పేజీకి పంపడం
+            window.location.href = "det_te.html";
+        });
+    </script>
+
+</body>
+
+</html>

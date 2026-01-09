@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="bho">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>किसान सेतु - फसल बेमारी जांच प्रणाली</title>
+    <style>
+        :root {
+            --primary: #1b5e20;
+            --secondary: #4caf50;
+            --bg: #f4f7f4;
+            --card: #ffffff;
+            --weather: #0288d1;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: var(--bg);
+            color: #333;
+            margin: 0;
+            padding: 15px;
+        }
+
+        .app-container {
+            max-width: 850px;
+            margin: auto;
+            background: var(--card);
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .form-section {
+            padding: 20px;
+        }
+
+        .subheading {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 25px 0 10px;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 5px;
+        }
+
+        .loc-weather-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .panel {
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            text-align: center;
+        }
+
+        .gps-panel {
+            background: #e8f5e9;
+        }
+
+        .weather-panel {
+            background: #e1f5fe;
+            color: var(--weather);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .btn-gps {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-diag {
+            background: var(--primary);
+            color: white;
+            font-size: 1.3rem;
+            margin-top: 25px;
+            box-shadow: 0 4px 10px rgba(27, 94, 32, 0.3);
+        }
+
+        .symptoms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 10px;
+        }
+
+        .symp-item {
+            display: flex;
+            align-items: center;
+            background: #fff;
+            border: 1px solid #eee;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .symp-item input {
+            margin-right: 12px;
+            width: 22px;
+            height: 22px;
+            accent-color: var(--primary);
+        }
+
+        #result {
+            margin-top: 30px;
+            display: none;
+            padding: 25px;
+            border-radius: 12px;
+            border: 3px solid var(--primary);
+            background: #fff;
+        }
+
+        .advice-box {
+            background: #fff9c4;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 5px solid #fbc02d;
+        }
+
+        @media (max-width: 600px) {
+
+            .loc-weather-container,
+            .symptoms-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app-container">
+        <header>
+            <h1>🌾 किसान सेतु</h1>
+            <p>रउआ फसल के डॉक्टर - बेमारी पहचानीं अउरी समाधान पायीं</p>
+        </header>
+
+        <div class="form-section">
+            <div class="subheading">कदम 1: जगह अउरी मौसम के जानकारी</div>
+            <div class="loc-weather-container">
+                <div class="panel gps-panel">
+                    <button class="btn btn-gps" onclick="getLocationData()">📍 आपन लोकेशन खोजीं</button>
+                    <div id="cityTxt" style="margin-top:10px; font-weight:bold;">लोकेशन: अभी नईखे मिलल</div>
+                </div>
+                <div class="panel weather-panel">
+                    <div style="font-size:0.8rem; font-weight:bold;">लाइव मौसम</div>
+                    <div id="tempTxt" style="font-size:1.4rem; font-weight:bold; margin-top:5px;">--°C</div>
+                    <div id="condTxt">--</div>
+                </div>
+            </div>
+
+            <div class="subheading">कदम 2: आपन फसल चुनीं</div>
+            <select id="cropSelect"
+                style="width:100%; padding:15px; border-radius:8px; border:1px solid #ccc; font-size: 1.1rem;">
+                <option value="rice">धान</option>
+                <option value="wheat">गेहूँ</option>
+                <option value="maize">मक्का (जनरे)</option>
+                <option value="potato">आलू</option>
+                <option value="tomato">टमाटर</option>
+                <option value="cotton">कपास</option>
+            </select>
+
+            <div class="subheading">कदम 3: फसल में का लउकता? (लक्षण चुनीं)</div>
+            <div id="sympGrid" class="symptoms-grid"></div>
+
+            <button class="btn btn-diag" onclick="runDiagnosis()">🔍 बेमारी के जाँच करीं</button>
+
+            <div id="result">
+                <h2 id="resTitle" style="margin-top:0; color:var(--primary); font-size: 1.6rem;"></h2>
+                <p id="resMeta" style="font-style:italic; color:#666;"></p>
+                <hr>
+                <strong>✅ डॉक्टर के सलाह (इलाज):</strong>
+                <ul id="resSols" style="line-height: 1.8; margin-top: 10px; font-size: 1.1rem;"></ul>
+                <div class="advice-box">
+                    <strong>💡 मौसम के अनुसार सलाह:</strong>
+                    <p id="resAdv" style="margin-top: 5px; font-size: 1rem;"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const symptomsList = [
+            "पत्ता पीयर (पीला) होखल", "पत्ता पर भूअर चाहे करिया दाग", "पत्ता पर उज्जर पाउडर नियर फफूंद",
+            "पत्ता के मुरझैल चाहे ऐंठल", "पत्ता के नोख चाहे कोना सुखल", "पूरा पौधा के मुरझा गइल",
+            "बढ़वार रुक गइल (बौनापन)", "फल / अनाज / कंद के सड़ल", "पत्ता में छेद होखल",
+            "पौधा में से गमक (महक) आइल", "फूल चाहे फल के गिरल", "पैदावार कम होखल",
+            "पत्ता के झड़ल", "तना चाहे गूलर के रंग बदलल"
+        ];
+
+        const grid = document.getElementById('sympGrid');
+        symptomsList.forEach(s => {
+            grid.innerHTML += `<label class="symp-item"><input type="checkbox" class="sc" value="${s}"> ${s}</label>`;
+        });
+
+        let globalCity = "मैनुअल";
+
+        async function getLocationData() {
+            if (!navigator.geolocation) return alert("रउआ मोबाइल GPS सपोर्ट नईखे करत");
+            navigator.geolocation.getCurrentPosition(async (p) => {
+                const { latitude: lat, longitude: lon } = p.coords;
+                try {
+                    const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+                    const wData = await wRes.json();
+                    document.getElementById('tempTxt').innerText = Math.round(wData.current_weather.temperature) + "°C";
+                    document.getElementById('condTxt').innerText = "कनेक्शन चालू बा";
+
+                    const gRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+                    const gData = await gRes.json();
+                    globalCity = gData.address.city || gData.address.state || "गाँव-जवार";
+                    document.getElementById('cityTxt').innerText = "📍 " + globalCity;
+                } catch (e) { alert("डाटा नईखे मिलत। नेट चेक करीं।"); }
+            });
+        }
+
+        const db = {
+            rice: [
+                { name: "पत्ता झुलसा (Leaf Blast)", symptoms: ["पत्ता पीयर (पीला) होखल", "पत्ता पर भूअर चाहे करिया दाग", "पत्ता के नोख चाहे कोना सुखल"], solutions: ["बेमार पत्ता के तुरंत काट के हटा दीं", "हर 10 दिन पर ट्राईसाइक्लाज़ोल के छिड़काव करीं", "पौधा के बीच में खाली जगह राखीं", "बढ़िया बीया के इस्तेमाल करीं"], advice: { summer: "रोज पानी दीं; खेत के सुखे मत दीं", monsoon: "पानी निकास के रस्ता बनाइय; जलजमाव मत होखे दीं", winter: "ठंढा सहे वाला बीया लगाइय" } },
+                { name: "पत्ता ब्लाइट", symptoms: ["पत्ता पीयर (पीला) होखल", "पूरा पौधा के मुरझा गइल", "पत्ता के नोख चाहे कोना सुखल"], solutions: ["बेमार पत्ता हटा दीं", "कॉपर ऑक्सीक्लोराइड के छिड़काव करीं", "खेत में घास-पात मत होखे दीं"], advice: { summer: "सिंचाई के ध्यान राखीं", monsoon: "खेत में पानी मत रुके दीं", winter: "बढ़िया बीया चुनीं" } }
+            ],
+            potato: [
+                { name: "पछुआ झुलसा (Late Blight)", symptoms: ["पत्ता पर भूअर चाहे करिया दाग", "पत्ता पर उज्जर पाउडर नियर फफूंद", "फल / अनाज / कंद के सड़ल"], solutions: ["बेमार पौधा के उखाड़ के फेंक दीं", "क्लोरोथैलोनिल के छिड़काव करीं", "साफ सुथरा आलू के बीया बोइय"], advice: { summer: "आलू के सही जगह राखीं", monsoon: "खेत में पानी मत रुके दीं", winter: "रोज खेत देखत रहीं" } }
+            ],
+            tomato: [
+                { name: "पत्ता मुड़ल बेमारी (Leaf Curl)", symptoms: ["पत्ता के मुरझैल चाहे ऐंठल", "पत्ता पीयर (पीला) होखल", "बढ़वार रुक गइल (बौनापन)"], solutions: ["बेमार पौधा उखाड़ दीं", "सफेद मक्खी रोके वाला दवाई छिड़कीं", "नया अउरी स्वस्थ पौधा लगाइय"], advice: { summer: "पौधा के घाम से बचाईं", monsoon: "पानी निकास सही राखीं", winter: "पाला से बचावल जरूरी बा" } }
+            ],
+            cotton: [
+                { name: "गूलर सड़न (Boll Rot)", symptoms: ["फल / अनाज / कंद के सड़ल", "पौधा में से गमक (महक) आइल", "पैदावार कम होखल"], solutions: ["सड़ल गूलर तुरंत हटा दीं", "कार्बेन्डाजिम के छिड़काव करीं"], advice: { summer: "पानी समय पर दीं", monsoon: "हवा अउरी रोशनी खातिर जगह राखीं", winter: "समय पर तुड़ाई करीं" } }
+            ],
+            maize: [
+                { name: "तना सड़न (Stem Rot)", symptoms: ["पूरा पौधा के मुरझा गइल", "पौधा में से गमक (महक) आइल"], solutions: ["सड़ल तना हटा दीं", "फफूंदनाशक दवाई छिड़कीं", "खेत के पानी निकाल दीं"], advice: { summer: "नमी बना के राखीं", monsoon: "जलजमाव मत होखे दीं", winter: "सही बीया चुनीं" } }
+            ],
+            wheat: [
+                { name: "गेरुआ रोग (Rust)", symptoms: ["पत्ता पर भूअर चाहे करिया दाग", "पत्ता पीयर (पीला) होखल"], solutions: ["प्रोपीकोनाज़ोल के छिड़काव करीं", "बेमार पौधा हटा दीं"], advice: { summer: "खेत तैयार करीं", monsoon: "निकास सही राखीं", winter: "समय पर बोआई करीं" } }
+            ]
+        };
+
+        function runDiagnosis() {
+            const crop = document.getElementById('cropSelect').value;
+            const selected = Array.from(document.querySelectorAll('.sc:checked')).map(i => i.value);
+            if (selected.length === 0) return alert("कमत कम एकगो लक्षण चुनीं!");
+
+            const month = new Date().getMonth();
+            const season = (month >= 2 && month <= 5) ? "summer" : (month >= 6 && month <= 9) ? "monsoon" : "winter";
+
+            let bestMatch = null;
+            let maxScore = 0;
+
+            (db[crop] || []).forEach(d => {
+                let score = d.symptoms.filter(s => selected.includes(s)).length;
+                if (score > maxScore) {
+                    maxScore = score;
+                    bestMatch = d;
+                }
+            });
+
+            const resDiv = document.getElementById('result');
+            resDiv.style.display = "block";
+
+            if (bestMatch && maxScore >= 1) {
+                document.getElementById('resTitle').innerText = "जाँच के नतीजा: " + bestMatch.name;
+                document.getElementById('resMeta').innerText = `जगह: ${globalCity} | मौसम: ${season === 'summer' ? 'गर्मी' : season === 'monsoon' ? 'बरसात' : 'जाड़ा'}`;
+
+                const solUl = document.getElementById('resSols');
+                solUl.innerHTML = "";
+                bestMatch.solutions.forEach(s => solUl.innerHTML += `<li>${s}</li>`);
+                document.getElementById('resAdv').innerText = bestMatch.advice[season];
+            } else {
+                document.getElementById('resTitle').innerText = "बात साफ नईखे";
+                document.getElementById('resMeta').innerText = "जवन लक्षण रउआ चुनले बानी, ओकरा से बेमारी साफ नईखे बुझात।";
+                document.getElementById('resSols').innerHTML = "<li>पौधा के फेर से ध्यान से देखीं।</li><li>देखीं की कवनो कीड़ा त नईखे लागल।</li><li>नजदीकी कृषि केंद्र पर दिखाईं।</li>";
+                document.getElementById('resAdv').innerText = "आम सलाह: खेत के साफ राखीं अउरी मौसम देख के पानी दीं।";
+            }
+            resDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Kisaan Setu</title>
+    <style>
+        :root {
+            --primary: #1b5e20;
+            --bg: #f0f4f0;
+            --card: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: var(--bg);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            text-align: center;
+            width: 100%;
+            max-width: 900px;
+            padding: 20px;
+        }
+
+        header h1 {
+            color: var(--primary);
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+        }
+
+        .language-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 20px;
+        }
+
+        .lang-card {
+            background: var(--card);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: 0.3s;
+            text-decoration: none;
+            display: block;
+        }
+
+        .lang-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .lang-card img {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            background: #eee;
+            /* Fallback color if image is missing */
+        }
+
+        .lang-name {
+            padding: 15px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .native-name {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--primary);
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <div style="font-size: 4rem;">🌾</div>
+            <h1>Welcome to Kisaan Setu</h1>
+            <p>Choose your language / अपनी भाषा चुनें</p>
+        </header>
+
+        <div class="language-grid">
+            <a href="reg_en.html" class="lang-card">
+                <img src="english.jpg" alt="English">
+                <div class="lang-name">English <span class="native-name">Global</span></div>
+            </a>
+
+            <a href="reg_hi.html" class="lang-card">
+                <img src="hindi.jpg" alt="Hindi">
+                <div class="lang-name">Hindi <span class="native-name">हिन्दी</span></div>
+            </a>
+
+            <a href="reg_kn.html" class="lang-card">
+                <img src="kannada.jpg" alt="Kannada">
+                <div class="lang-name">Kannada <span class="native-name">ಕನ್ನಡ</span></div>
+            </a>
+
+            <a href="reg_bho.html" class="lang-card">
+                <img src="bhojpuri.jpg" alt="Bhojpuri">
+                <div class="lang-name">Bhojpuri <span class="native-name">भोजपुरी</span></div>
+            </a>
+
+            <a href="reg_te.html" class="lang-card">
+                <img src="telugu.jpg" alt="Telugu">
+                <div class="lang-name">Telugu <span class="native-name">తెలుగు</span></div>
+            </a>
+        </div>
+    </div>
+
+</body>
+
+</html>

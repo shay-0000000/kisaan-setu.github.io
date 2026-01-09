@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="kn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ಕಿಸಾನ್ ಸೇತು - ಬೆಳೆ ರೋಗ ಪತ್ತೆ ಹಚ್ಚುವ ವ್ಯವಸ್ಥೆ</title>
+    <style>
+        :root {
+            --primary: #1b5e20;
+            --secondary: #4caf50;
+            --bg: #f4f7f4;
+            --card: #ffffff;
+            --weather: #0288d1;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            color: #333;
+            margin: 0;
+            padding: 15px;
+        }
+
+        .app-container {
+            max-width: 850px;
+            margin: auto;
+            background: var(--card);
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .form-section {
+            padding: 20px;
+        }
+
+        .subheading {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 25px 0 10px;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 5px;
+        }
+
+        .loc-weather-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .panel {
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            text-align: center;
+        }
+
+        .gps-panel {
+            background: #e8f5e9;
+        }
+
+        .weather-panel {
+            background: #e1f5fe;
+            color: var(--weather);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .btn-gps {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-diag {
+            background: var(--primary);
+            color: white;
+            font-size: 1.3rem;
+            margin-top: 25px;
+            box-shadow: 0 4px 10px rgba(27, 94, 32, 0.3);
+        }
+
+        .symptoms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 10px;
+        }
+
+        .symp-item {
+            display: flex;
+            align-items: center;
+            background: #fff;
+            border: 1px solid #eee;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+
+        .symp-item input {
+            margin-right: 12px;
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary);
+        }
+
+        #result {
+            margin-top: 30px;
+            display: none;
+            padding: 25px;
+            border-radius: 12px;
+            border: 3px solid var(--primary);
+            background: #fff;
+        }
+
+        .advice-box {
+            background: #fff9c4;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 5px solid #fbc02d;
+        }
+
+        @media (max-width: 600px) {
+
+            .loc-weather-container,
+            .symptoms-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app-container">
+        <header>
+            <h1>🌾 ಕಿಸಾನ್ ಸೇತು</h1>
+            <p>ಬೆಳೆ ರೋಗ ನಿರ್ಣಯ ಮತ್ತು ಕಾಲೋಚಿತ ಸಲಹಾ ಕೇಂದ್ರ</p>
+        </header>
+
+        <div class="form-section">
+            <div class="subheading">ಹಂತ 1: ಸ್ಥಳ ಮತ್ತು ಹವಾಮಾನ</div>
+            <div class="loc-weather-container">
+                <div class="panel gps-panel">
+                    <button class="btn btn-gps" onclick="getLocationData()">📍 ನಿಮ್ಮ ಸ್ಥಳವನ್ನು ಪತ್ತೆಹಚ್ಚಿ</button>
+                    <div id="cityTxt" style="margin-top:10px; font-weight:bold;">ಸ್ಥಳ: ನಿಗದಿಪಡಿಸಿಲ್ಲ</div>
+                </div>
+                <div class="panel weather-panel">
+                    <div style="font-size:0.8rem; font-weight:bold;">ಪ್ರಸ್ತುತ ಹವಾಮಾನ</div>
+                    <div id="tempTxt" style="font-size:1.4rem; font-weight:bold; margin-top:5px;">--°C</div>
+                    <div id="condTxt">--</div>
+                </div>
+            </div>
+
+            <div class="subheading">ಹಂತ 2: ನಿಮ್ಮ ಬೆಳೆಯನ್ನು ಆರಿಸಿ</div>
+            <select id="cropSelect"
+                style="width:100%; padding:15px; border-radius:8px; border:1px solid #ccc; font-size: 1rem;">
+                <option value="rice">ಭತ್ತ (ಅಕ್ಕಿ)</option>
+                <option value="wheat">ಗೋಧಿ</option>
+                <option value="maize">ಮೆಕ್ಕೆಜೋಳ</option>
+                <option value="potato">ಆಲೂಗಡ್ಡೆ</option>
+                <option value="tomato">ಟೊಮ್ಯಾಟೋ</option>
+                <option value="cotton">ಹತ್ತಿ</option>
+            </select>
+
+            <div class="subheading">ಹಂತ 3: ಬೆಳೆಯ ಲಕ್ಷಣಗಳನ್ನು ಆರಿಸಿ</div>
+            <div id="sympGrid" class="symptoms-grid"></div>
+
+            <button class="btn btn-diag" onclick="runDiagnosis()">🔍 ಬೆಳೆ ಆರೋಗ್ಯ ತಪಾಸಣೆ ಮಾಡಿ</button>
+
+            <div id="result">
+                <h2 id="resTitle" style="margin-top:0; color:var(--primary); font-size: 1.5rem;"></h2>
+                <p id="resMeta" style="font-style:italic; color:#666;"></p>
+                <hr>
+                <strong>✅ ಶಿಫಾರಸು ಮಾಡಿದ ಪರಿಹಾರಗಳು:</strong>
+                <ul id="resSols" style="line-height: 1.6; margin-top: 10px;"></ul>
+                <div class="advice-box">
+                    <strong>💡 ಕಾಲೋಚಿತ ಸಲಹೆ:</strong>
+                    <p id="resAdv" style="margin-top: 5px;"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const symptomsList = [
+            "ಎಲೆಗಳು ಹಳದಿಯಾಗುವುದು", "ಎಲೆಗಳ ಮೇಲೆ ಕಂದು ಅಥವಾ ಕಪ್ಪು ಚುಕ್ಕೆಗಳು", "ಎಲೆಗಳ ಮೇಲೆ ಬಿಳಿ ಪುಡಿ ಅಥವಾ ಶಿಲೀಂಧ್ರ",
+            "ಎಲೆಗಳು ಮುದುಡುವುದು ಅಥವಾ ಸುರುಳಿಯಾಗುವುದು", "ಎಲೆಗಳ ತುದಿ ಅಥವಾ ಅಂಚು ಒಣಗುವುದು", "ಸಂಪೂರ್ಣ ಗಿಡ ಬಾಡುವುದು",
+            "ಬೆಳವಣಿಗೆ ಕುಂಠಿತವಾಗುವುದು", "ಕೊಳೆತ ಹಣ್ಣುಗಳು / ಧಾನ್ಯಗಳು / ಕಾಯಿಗಳು / ಗೆಡ್ಡೆಗಳು", "ಎಲೆಗಳಲ್ಲಿ ರಂಧ್ರಗಳು ಅಥವಾ ಹಾನಿ",
+            "ಗಿಡ ಅಥವಾ ಉತ್ಪನ್ನದಿಂದ ಕೆಟ್ಟ ವಾಸನೆ", "ಹೂವುಗಳು ಅಥವಾ ಹಣ್ಣುಗಳು ಉದುರುವುದು", "ಕಡಿಮೆ ಇಳುವರಿ / ಸಣ್ಣ ಗಾತ್ರದ ಉತ್ಪನ್ನ",
+            "ಎಲೆಗಳು ಉದುರುವುದು", "ಕಾಂಡ ಅಥವಾ ಕಾಯಿಗಳ ಬಣ್ಣ ಬದಲಾಗುವುದು"
+        ];
+
+        const grid = document.getElementById('sympGrid');
+        symptomsList.forEach(s => {
+            grid.innerHTML += `<label class="symp-item"><input type="checkbox" class="sc" value="${s}"> ${s}</label>`;
+        });
+
+        let globalCity = "ಸ್ಥಳ ತಿಳಿದಿಲ್ಲ";
+
+        async function getLocationData() {
+            if (!navigator.geolocation) return alert("ನಿಮ್ಮ ಬ್ರೌಸರ್ GPS ಬೆಂಬಲಿಸುವುದಿಲ್ಲ");
+            navigator.geolocation.getCurrentPosition(async (p) => {
+                const { latitude: lat, longitude: lon } = p.coords;
+                try {
+                    const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+                    const wData = await wRes.json();
+                    document.getElementById('tempTxt').innerText = Math.round(wData.current_weather.temperature) + "°C";
+                    document.getElementById('condTxt').innerText = "ಸಂಪರ್ಕ ಸಕ್ರಿಯವಾಗಿದೆ";
+
+                    const gRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+                    const gData = await gRes.json();
+                    globalCity = gData.address.city || gData.address.village || gData.address.state || "ಗೊತ್ತುಪಡಿಸಿದ ಪ್ರದೇಶ";
+                    document.getElementById('cityTxt').innerText = "📍 " + globalCity;
+                } catch (e) { alert("ಮಾಹಿತಿ ಪಡೆಯಲು ವಿಫಲವಾಗಿದೆ. ಇಂಟರ್ನೆಟ್ ಪರಿಶೀಲಿಸಿ."); }
+            });
+        }
+
+        const db = {
+            rice: [
+                { name: "ಬೆಂಕಿ ರೋಗ (Leaf Blast)", symptoms: ["ಎಲೆಗಳು ಹಳದಿಯಾಗುವುದು", "ಎಲೆಗಳ ಮೇಲೆ ಕಂದು ಅಥವಾ ಕಪ್ಪು ಚುಕ್ಕೆಗಳು", "ಎಲೆಗಳ ತುದಿ ಅಥವಾ ಅಂಚು ಒಣಗುವುದು", "ಕಡಿಮೆ ಇಳುವರಿ / ಸಣ್ಣ ಗಾತ್ರದ ಉತ್ಪನ್ನ"], solutions: ["ಸೋಂಕಿತ ಎಲೆಗಳನ್ನು ತಕ್ಷಣ ತೆಗೆದುಹಾಕಿ", "ಪ್ರತಿ 10 ದಿನಗಳಿಗೊಮ್ಮೆ ಟ್ರೈಸೈಕ್ಲಾಜೋಲ್ ಸಿಂಪಡಿಸಿ", "ಗಿಡಗಳ ನಡುವೆ ಸರಿಯಾದ ಅಂತರವಿರಲಿ", "ಆರೋಗ್ಯಕರ ಬೀಜಗಳನ್ನು ಬಳಸಿ"], advice: { summer: "ನಿಯಮಿತವಾಗಿ ನೀರು ಹಾಯಿಸಿ; ಗದ್ದೆ ಪೂರ್ತಿ ಒಣಗದಂತೆ ನೋಡಿಕೊಳ್ಳಿ", monsoon: "ನೀರು ನಿಲ್ಲದಂತೆ ಎಚ್ಚರ ವಹಿಸಿ", winter: "ಚಳಿಯನ್ನು ತಡೆದುಕೊಳ್ಳುವ ತಳಿಗಳನ್ನು ಬಳಸಿ" } },
+                { name: "ಎಲೆ ಬ್ಲೈಟ್ (Leaf Blight)", symptoms: ["ಎಲೆಗಳು ಹಳದಿಯಾಗುವುದು", "ಸಂಪೂರ್ಣ ಗಿಡ ಬಾಡುವುದು", "ಎಲೆಗಳ ತುದಿ ಅಥವಾ ಅಂಚು ಒಣಗುವುದು"], solutions: ["ಸೋಂಕಿತ ಎಲೆಗಳನ್ನು ತೆಗೆಯಿರಿ", "ಕಾಪರ್ ಆಕ್ಸಿಕ್ಲೋರೈಡ್ ಸಿಂಪಡಿಸಿ", "ಕಳೆ ಮುಕ್ತವಾಗಿಡಿ"], advice: { summer: "ಸರಿಯಾದ ನೀರಾವರಿ ಮಾಡಿ", monsoon: "ನೀರನ್ನು ಹೊರಹಾಕಲು ವ್ಯವಸ್ಥೆ ಮಾಡಿ", winter: "ನಿರೋಧಕ ತಳಿಗಳನ್ನು ಬಳಸಿ" } }
+            ],
+            wheat: [
+                { name: "ತುಕ್ಕು ರೋಗ (Rust Disease)", symptoms: ["ಎಲೆಗಳ ಮೇಲೆ ಕಂದು ಅಥವಾ ಕಪ್ಪು ಚುಕ್ಕೆಗಳು", "ಎಲೆಗಳು ಹಳದಿಯಾಗುವುದು"], solutions: ["ಪ್ರೊಪಿಕೊನಜೋಲ್ ಸಿಂಪಡಿಸಿ", "ರೋಗಗ್ರಸ್ತ ಗಿಡಗಳನ್ನು ತೆಗೆಯಿರಿ", "ನಿರೋಧಕ ಬೀಜ ಬಳಸಿ"], advice: { summer: "ಭೂಮಿ ಸಿದ್ಧಪಡಿಸಿ", monsoon: "ನೀರು ನಿಲ್ಲದಂತೆ ನೋಡಿಕೊಳ್ಳಿ", winter: "ಸರಿಯಾದ ಸಮಯದಲ್ಲಿ ಬಿತ್ತನೆ ಮಾಡಿ" } }
+            ],
+            maize: [
+                { name: "ಕಾಂಡ ಕೊಳೆತ (Stem Rot)", symptoms: ["ಸಂಪೂರ್ಣ ಗಿಡ ಬಾಡುವುದು", "ಗಿಡ ಅಥವಾ ಉತ್ಪನ್ನದಿಂದ ಕೆಟ್ಟ ವಾಸನೆ", "ಕಡಿಮೆ ಇಳುವರಿ / ಸಣ್ಣ ಗಾತ್ರದ ಉತ್ಪನ್ನ"], solutions: ["ಪೀಡಿತ ಕಾಂಡಗಳನ್ನು ತೆಗೆಯಿರಿ", "ಶಿಲೀಂಧ್ರನಾಶಕ ಸಿಂಪಡಿಸಿ", "ನೀರು ನಿಲ್ಲದಂತೆ ನೋಡಿಕೊಳ್ಳಿ"], advice: { summer: "ಸರಿಯಾಗಿ ನೀರು ನೀಡಿ", monsoon: "ಚರಂಡಿ ವ್ಯವಸ್ಥೆ ಸರಿಯಾಗಿರಲಿ", winter: "ನಿರೋಧಕ ತಳಿ ಬಳಸಿ" } }
+            ],
+            potato: [
+                { name: "ಅಂಗಮಾರಿ ರೋಗ (Late Blight)", symptoms: ["ಎಲೆಗಳ ಮೇಲೆ ಕಂದು ಅಥವಾ ಕಪ್ಪು ಚುಕ್ಕೆಗಳು", "ಎಲೆಗಳ ಮೇಲೆ ಬಿಳಿ ಪುಡಿ ಅಥವಾ ಶಿಲೀಂಧ್ರ", "ಕೊಳೆತ ಹಣ್ಣುಗಳು / ಧಾನ್ಯಗಳು / ಕಾಯಿಗಳು / ಗೆಡ್ಡೆಗಳು"], solutions: ["ತಕ್ಷಣ ರೋಗಗ್ರಸ್ತ ಗಿಡಗಳನ್ನು ತೆಗೆಯಿರಿ", "ಕ್ಲೋರೋಥಲೋನಿಲ್ ಸಿಂಪಡಿಸಿ", "ಆರೋಗ್ಯಕರ ಗೆಡ್ಡೆಗಳನ್ನು ಬಳಸಿ"], advice: { summer: "ಗೆಡ್ಡೆಗಳನ್ನು ಸರಿಯಾಗಿ ಸಂಗ್ರಹಿಸಿ", monsoon: "ನೀರು ನಿಲ್ಲದಂತೆ ಎಚ್ಚರ ವಹಿಸಿ", winter: "ನಿಯಮಿತವಾಗಿ ತಪಾಸಣೆ ಮಾಡಿ" } }
+            ],
+            tomato: [
+                { name: "ಎಲೆ ಮುದುಡು ರೋಗ (Leaf Curl)", symptoms: ["ಎಲೆಗಳು ಮುದುಡುವುದು ಅಥವಾ ಸುರುಳಿಯಾಗುವುದು", "ಎಲೆಗಳು ಹಳದಿಯಾಗುವುದು", "ಬೆಳವಣಿಗೆ ಕುಂಠಿತವಾಗುವುದು"], solutions: ["ಸೋಂಕಿತ ಗಿಡಗಳನ್ನು ತೆಗೆಯಿರಿ", "ಬಿಳಿ ನೊಣಗಳನ್ನು ನಿಯಂತ್ರಿಸಲು ಕೀಟನಾಶಕ ಬಳಸಿ", "ಆರೋಗ್ಯಕರ ಸಸಿಗಳನ್ನು ಹಚ್ಚಿ"], advice: { summer: "ನೆರಳಿನ ವ್ಯವಸ್ಥೆ ಮಾಡಿ", monsoon: "ನೀರು ಹರಿದುಹೋಗುವಂತೆ ಮಾಡಿ", winter: "ಹಿಮದಿಂದ ರಕ್ಷಿಸಿ" } }
+            ],
+            cotton: [
+                { name: "ಕಾಯಿ ಕೊಳೆತ (Boll Rot)", symptoms: ["ಕೊಳೆತ ಹಣ್ಣುಗಳು / ಧಾನ್ಯಗಳು / ಕಾಯಿಗಳು / ಗೆಡ್ಡೆಗಳು", "ಗಿಡ ಅಥವಾ ಉತ್ಪನ್ನದಿಂದ ಕೆಟ್ಟ ವಾಸನೆ", "ಕಡಿಮೆ ಇಳುವರಿ / ಸಣ್ಣ ಗಾತ್ರದ ಉತ್ಪನ್ನ"], solutions: ["ಪೀಡಿತ ಕಾಯಿಗಳನ್ನು ತಕ್ಷಣ ತೆಗೆಯಿರಿ", "ಕಾರ್ಬೆಂಡಜಿಮ್ ಸಿಂಪಡಿಸಿ"], advice: { summer: "ನೀರಾವರಿ ಸರಿಯಾಗಿರಲಿ", monsoon: "ಅಂತರ ಕಾಪಾಡಿಕೊಳ್ಳಿ", winter: "ಸರಿಯಾದ ಸಮಯದಲ್ಲಿ ಕಟಾವು ಮಾಡಿ" } }
+            ]
+        };
+
+        function runDiagnosis() {
+            const crop = document.getElementById('cropSelect').value;
+            const selected = Array.from(document.querySelectorAll('.sc:checked')).map(i => i.value);
+            if (selected.length === 0) return alert("ದಯವಿಟ್ಟು ಕನಿಷ್ಠ ಒಂದು ಲಕ್ಷಣವನ್ನು ಆರಿಸಿ.");
+
+            const month = new Date().getMonth();
+            const season = (month >= 2 && month <= 5) ? "summer" : (month >= 6 && month <= 9) ? "monsoon" : "winter";
+
+            let bestMatch = null;
+            let maxScore = 0;
+
+            (db[crop] || []).forEach(d => {
+                let score = d.symptoms.filter(s => selected.includes(s)).length;
+                if (score > maxScore) {
+                    maxScore = score;
+                    bestMatch = d;
+                }
+            });
+
+            const resDiv = document.getElementById('result');
+            resDiv.style.display = "block";
+
+            if (bestMatch && maxScore >= 1) {
+                document.getElementById('resTitle').innerText = "ಸಂಭವನೀಯ ರೋಗ: " + bestMatch.name;
+                document.getElementById('resMeta').innerText = `ಪ್ರದೇಶ: ${globalCity} | ಪ್ರಸ್ತುತ ಕಾಲ: ${season === 'summer' ? 'ಬೇಸಿಗೆ' : season === 'monsoon' ? 'ಮಳೆಗಾಲ' : 'ಚಳಿಗಾಲ'}`;
+
+                const solUl = document.getElementById('resSols');
+                solUl.innerHTML = "";
+                bestMatch.solutions.forEach(s => solUl.innerHTML += `<li>${s}</li>`);
+                document.getElementById('resAdv').innerText = bestMatch.advice[season];
+            } else {
+                document.getElementById('resTitle').innerText = "ಸ್ಪಷ್ಟವಾಗಿ ಪತ್ತೆಯಾಗಿಲ್ಲ";
+                document.getElementById('resMeta').innerText = "ನೀವು ಆರಿಸಿದ ಲಕ್ಷಣಗಳು ಯಾವುದೇ ನಿರ್ದಿಷ್ಟ ರೋಗಕ್ಕೆ ಹೊಂದಿಕೆಯಾಗುತ್ತಿಲ್ಲ.";
+                document.getElementById('resSols').innerHTML = "<li>ಗಿಡವನ್ನು ಹತ್ತಿರದಿಂದ ಗಮನಿಸಿ.</li><li>ಕೀಟಗಳಿವೆಯೇ ಅಥವಾ ನೀರಿನ ಕೊರತೆಯಿದೆಯೇ ನೋಡಿ.</li><li>ಕೃಷಿ ತಜ್ಞರ ಸಲಹೆ ಪಡೆಯಿರಿ.</li>";
+                document.getElementById('resAdv').innerText = "ಸಾಮಾನ್ಯ ಸಲಹೆ: ಹೊಲವನ್ನು ಸ್ವಚ್ಛವಾಗಿಡಿ ಮತ್ತು ಹವಾಮಾನಕ್ಕೆ ತಕ್ಕಂತೆ ನೀರು ಹಾಯಿಸಿ.";
+            }
+            resDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+
+</html>

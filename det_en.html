@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KISAAN SETU - Full Diagnostic System</title>
+    <style>
+        :root {
+            --primary: #1b5e20;
+            --secondary: #4caf50;
+            --bg: #f4f7f4;
+            --card: #ffffff;
+            --weather: #0288d1;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: #333;
+            margin: 0;
+            padding: 15px;
+        }
+
+        .app-container {
+            max-width: 850px;
+            margin: auto;
+            background: var(--card);
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .form-section {
+            padding: 20px;
+        }
+
+        .subheading {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 25px 0 10px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .loc-weather-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .panel {
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            text-align: center;
+        }
+
+        .gps-panel {
+            background: #e8f5e9;
+        }
+
+        .weather-panel {
+            background: #e1f5fe;
+            color: var(--weather);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .btn-gps {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-diag {
+            background: var(--primary);
+            color: white;
+            font-size: 1.2rem;
+            margin-top: 25px;
+            box-shadow: 0 4px 10px rgba(27, 94, 32, 0.3);
+        }
+
+        .symptoms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 10px;
+        }
+
+        .symp-item {
+            display: flex;
+            align-items: center;
+            background: #fff;
+            border: 1px solid #eee;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .symp-item input {
+            margin-right: 12px;
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary);
+        }
+
+        #result {
+            margin-top: 30px;
+            display: none;
+            padding: 25px;
+            border-radius: 12px;
+            border: 3px solid var(--primary);
+            background: #fff;
+        }
+
+        .advice-box {
+            background: #fff9c4;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 5px solid #fbc02d;
+        }
+
+        @media (max-width: 600px) {
+
+            .loc-weather-container,
+            .symptoms-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app-container">
+        <header>
+            <h1>🌾 KISAAN SETU</h1>
+            <p>Expert Disease Diagnosis & Seasonal Solutions</p>
+        </header>
+
+        <div class="form-section">
+            <div class="subheading">Step 1: Location & Live Weather</div>
+            <div class="loc-weather-container">
+                <div class="panel gps-panel">
+                    <button class="btn btn-gps" onclick="getLocationData()">📍 Get GPS Location</button>
+                    <div id="cityTxt" style="margin-top:10px; font-weight:bold;">Location: Not Set</div>
+                </div>
+                <div class="panel weather-panel">
+                    <div style="font-size:0.8rem; font-weight:bold;">LIVE WEATHER</div>
+                    <div id="tempTxt" style="font-size:1.4rem; font-weight:bold; margin-top:5px;">--°C</div>
+                    <div id="condTxt">--</div>
+                </div>
+            </div>
+
+            <div class="subheading">Step 2: Choose Your Crop</div>
+            <select id="cropSelect"
+                style="width:100%; padding:15px; border-radius:8px; border:1px solid #ccc; font-size: 1rem;">
+                <option value="rice">RICE (PADDY)</option>
+                <option value="wheat">WHEAT</option>
+                <option value="maize">MAIZE (CORN)</option>
+                <option value="potato">POTATO</option>
+                <option value="tomato">TOMATO</option>
+                <option value="cotton">COTTON</option>
+            </select>
+
+            <div class="subheading">Step 3: Select Symptoms</div>
+            <div id="sympGrid" class="symptoms-grid"></div>
+
+            <button class="btn btn-diag" onclick="runDiagnosis()">🔍 ANALYZE CROP HEALTH</button>
+
+            <div id="result">
+                <h2 id="resTitle" style="margin-top:0; color:var(--primary); font-size: 1.5rem;"></h2>
+                <p id="resMeta" style="font-style:italic; color:#666;"></p>
+                <hr>
+                <strong>✅ Recommended Solutions:</strong>
+                <ul id="resSols" style="line-height: 1.6; margin-top: 10px;"></ul>
+                <div class="advice-box">
+                    <strong>💡 Seasonal Advice:</strong>
+                    <p id="resAdv" style="margin-top: 5px;"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const symptomsList = [
+            "Yellowing of leaves", "Brown or black spots on leaves", "White powder or fungal growth on leaves",
+            "Leaf curling or twisting", "Drying of leaf tips or edges", "Wilting of whole plant",
+            "Stunted (slow) growth", "Rotten fruits / grains / bolls / tubers", "Holes or damage on leaves",
+            "Bad smell from plant or produce", "Falling of flowers or fruits", "Poor yield / small size produce",
+            "Dropping of leaves", "Discoloration of stems or bolls"
+        ];
+
+        const grid = document.getElementById('sympGrid');
+        symptomsList.forEach(s => {
+            grid.innerHTML += `<label class="symp-item"><input type="checkbox" class="sc" value="${s}"> ${s}</label>`;
+        });
+
+        let globalCity = "Manual Location";
+
+        async function getLocationData() {
+            if (!navigator.geolocation) return alert("GPS not supported");
+            navigator.geolocation.getCurrentPosition(async (p) => {
+                const { latitude: lat, longitude: lon } = p.coords;
+                try {
+                    const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+                    const wData = await wRes.json();
+                    document.getElementById('tempTxt').innerText = Math.round(wData.current_weather.temperature) + "°C";
+                    document.getElementById('condTxt').innerText = "Active Connection";
+
+                    const gRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+                    const gData = await gRes.json();
+                    globalCity = gData.address.city || gData.address.state || "Known Region";
+                    document.getElementById('cityTxt').innerText = "📍 " + globalCity;
+                } catch (e) { alert("Data fetch failed. Please check internet."); }
+            });
+        }
+
+        const db = {
+            rice: [
+                { name: "Leaf Blast", symptoms: ["Yellowing of leaves", "Brown or black spots on leaves", "Drying of leaf tips or edges", "Poor yield / small size produce"], solutions: ["Remove infected leaves immediately", "Spray Tricyclazole every 10 days", "Maintain spacing", "Use healthy seeds"], advice: { summer: "Do water regularly; Don't let field dry completely", monsoon: "Do ensure drainage; Don't allow stagnant water", winter: "Do use cold-tolerant varieties; Don't sow late" } },
+                { name: "Leaf Blight", symptoms: ["Yellowing of leaves", "Wilting of whole plant", "Drying of leaf tips or edges", "Poor yield / small size produce"], solutions: ["Remove infected leaves", "Spray Copper Oxychloride", "Maintain proper spacing", "Keep field weed-free"], advice: { summer: "Do irrigate properly; Don’t overheat plants", monsoon: "Do maintain drainage; Don’t let water stand for long", winter: "Do use resistant seeds; Don’t sow late" } },
+                { name: "Brown Spot", symptoms: ["Brown or black spots on leaves", "Yellowing of leaves", "Stunted (slow) growth"], solutions: ["Remove infected leaves", "Spray Tricyclazole", "Avoid overcrowding", "Maintain field hygiene"], advice: { summer: "Do water regularly; Don’t ignore small brown spots", monsoon: "Do proper drainage; Don’t let water stagnate", winter: "Do reduce irrigation; Don’t plant susceptible varieties" } }
+            ],
+            wheat: [
+                { name: "Rust Disease", symptoms: ["Brown or black spots on leaves", "Yellowing of leaves", "Poor yield / small size produce"], solutions: ["Spray Propiconazole", "Remove infected plants", "Use resistant seeds", "Keep field weed-free"], advice: { summer: "Do prepare land; Don't sow in hot weather", monsoon: "Do ensure drainage; Don't overwater", winter: "Do timely sowing; Don't ignore foggy conditions" } },
+                { name: "Powdery Disease", symptoms: ["White powder or fungal growth on leaves", "Stunted (slow) growth", "Yellowing of leaves"], solutions: ["Spray Propiconazole or other fungicide", "Remove affected leaves", "Keep good spacing", "Use resistant seeds"], advice: { summer: "Do prepare soil; Don't sow wheat", monsoon: "Do drain water; Don't let field stay wet", winter: "Do irrigate carefully; Don't ignore white spots" } },
+                { name: "Leaf Spot", symptoms: ["Brown or black spots on leaves", "Drying of leaf tips or edges", "Poor yield / small size produce"], solutions: ["Remove infected leaves", "Spray fungicide", "Keep field clean", "Avoid excess nitrogen"], advice: { summer: "Do keep plants hydrated; Don't plant in hot months", monsoon: "Do ensure drainage; Don't let water stagnate", winter: "Do use healthy seeds; Don't ignore brown spots" } }
+            ],
+            maize: [
+                { name: "Leaf Blight", symptoms: ["Brown or black spots on leaves", "Yellowing of leaves", "Drying of leaf tips or edges"], solutions: ["Remove infected leaves", "Spray Mancozeb every 10–15 days", "Maintain proper spacing", "Use treated seeds"], advice: { summer: "Do water regularly; Don't let soil dry", monsoon: "Do improve drainage; Don't overcrowd", winter: "Do use early-maturing varieties" } },
+                { name: "Downy Disease", symptoms: ["White powder or fungal growth on leaves", "Yellowing of leaves", "Stunted (slow) growth"], solutions: ["Spray fungicide", "Remove affected leaves", "Maintain spacing", "Keep soil well-drained"], advice: { summer: "Do water properly; Don't overheat", monsoon: "Do prevent waterlogging", winter: "Do use healthy seeds" } },
+                { name: "Stem Rot", symptoms: ["Wilting of whole plant", "Bad smell from plant or produce", "Poor yield / small size produce"], solutions: ["Remove affected stems", "Spray fungicide", "Improve drainage", "Keep plants spaced"], advice: { summer: "Do water properly; Don't let soil dry", monsoon: "Do ensure drainage; Don't let water stand", winter: "Do use resistant varieties" } }
+            ],
+            potato: [
+                { name: "Late Blight", symptoms: ["Brown or black spots on leaves", "White powder or fungal growth on leaves", "Rotten fruits / grains / bolls / tubers"], solutions: ["Remove infected plants immediately", "Spray Chlorothalonil regularly", "Use healthy seed tubers", "Keep field clean"], advice: { summer: "Do store seed tubers properly; Don’t plant", monsoon: "Do ensure drainage; Don’t plant in humid areas", winter: "Do irrigate properly; Don’t ignore infection" } },
+                { name: "Early Blight", symptoms: ["Brown or black spots on leaves", "Yellowing of leaves", "Poor yield / small size produce"], solutions: ["Remove infected leaves", "Spray fungicide regularly", "Maintain spacing", "Avoid humid areas"], advice: { summer: "Do store tubers in shade; Don’t plant", monsoon: "Do maintain drainage; Don’t overcrowd", winter: "Do timely irrigation" } },
+                { name: "Tuber Rot", symptoms: ["Rotten fruits / grains / bolls / tubers", "Bad smell from plant or produce", "Wilting of whole plant"], solutions: ["Remove infected tubers", "Spray fungicide", "Avoid excess watering", "Keep field clean"], advice: { summer: "Do store tubers properly", monsoon: "Do improve drainage", winter: "Do inspect regularly" } }
+            ],
+            tomato: [
+                { name: "Leaf Curl Disease", symptoms: ["Leaf curling or twisting", "Yellowing of leaves", "Stunted (slow) growth"], solutions: ["Remove infected plants", "Control whiteflies with insecticide", "Use healthy seedlings", "Maintain spacing"], advice: { summer: "Do provide shade; Don’t let plants overheat", monsoon: "Do improve drainage", winter: "Do protect from frost" } },
+                { name: "Leaf Spot", symptoms: ["Brown or black spots on leaves", "Yellowing of leaves", "Drying of leaf tips or edges"], solutions: ["Remove affected leaves", "Spray fungicide regularly", "Maintain air circulation", "Keep plants spaced"], advice: { summer: "Do water properly; Don’t let soil dry", monsoon: "Do prevent waterlogging", winter: "Do monitor leaves" } },
+                { name: "Fruit Rot", symptoms: ["Rotten fruits / grains / bolls / tubers", "Bad smell from plant or produce", "Falling of flowers or fruits"], solutions: ["Remove affected fruits immediately", "Spray fungicide", "Avoid waterlogging", "Harvest on time"], advice: { summer: "Do irrigate properly", monsoon: "Do proper drainage", winter: "Do monitor for infection" } }
+            ],
+            cotton: [
+                { name: "Leaf Spot", symptoms: ["Brown or black spots on leaves", "Yellowing of leaves", "Dropping of leaves"], solutions: ["Remove infected leaves", "Spray Carbendazim", "Keep field clean", "Maintain spacing"], advice: { summer: "Do prepare land properly", monsoon: "Do remove weeds; Don’t overcrowd", winter: "Do monitor leaves" } },
+                { name: "Boll Rot", symptoms: ["Rotten fruits / grains / bolls / tubers", "Bad smell from plant or produce", "Poor yield / small size produce"], solutions: ["Remove affected bolls immediately", "Spray Carbendazim", "Maintain air circulation", "Keep plants spaced"], advice: { summer: "Do irrigate properly", monsoon: "Do drainage and spacing", winter: "Do timely harvest" } },
+                { name: "Root Rot", symptoms: ["Wilting of whole plant", "Yellowing of leaves", "Stunted (slow) growth"], solutions: ["Remove infected plants", "Spray fungicide", "Avoid waterlogging", "Maintain soil health"], advice: { summer: "Do water carefully", monsoon: "Do improve drainage", winter: "Do inspect roots" } }
+            ]
+        };
+
+        function runDiagnosis() {
+            const crop = document.getElementById('cropSelect').value;
+            const selected = Array.from(document.querySelectorAll('.sc:checked')).map(i => i.value);
+            if (selected.length === 0) return alert("Please select symptoms.");
+
+            const month = new Date().getMonth();
+            const season = (month >= 2 && month <= 5) ? "summer" : (month >= 6 && month <= 9) ? "monsoon" : "winter";
+
+            let bestMatch = null;
+            let maxScore = 0;
+
+            (db[crop] || []).forEach(d => {
+                let score = d.symptoms.filter(s => selected.includes(s)).length;
+                if (score > maxScore) {
+                    maxScore = score;
+                    bestMatch = d;
+                }
+            });
+
+            const resDiv = document.getElementById('result');
+            resDiv.style.display = "block";
+
+            if (bestMatch && maxScore >= 1) {
+                document.getElementById('resTitle').innerText = "Diagnosis: " + bestMatch.name;
+                document.getElementById('resMeta').innerText = `Region: ${globalCity} | Season: ${season.toUpperCase()} | Symptom Match: ${maxScore}/${bestMatch.symptoms.length}`;
+
+                const solUl = document.getElementById('resSols');
+                solUl.innerHTML = "";
+                bestMatch.solutions.forEach(s => solUl.innerHTML += `<li>${s}</li>`);
+                document.getElementById('resAdv').innerText = bestMatch.advice[season];
+            } else {
+                document.getElementById('resTitle').innerText = "Condition Unclear";
+                document.getElementById('resMeta').innerText = "Insufficient symptoms selected for a specific diagnosis.";
+                document.getElementById('resSols').innerHTML = "<li>Examine the plant more closely.</li><li>Check soil moisture and visible pests.</li><li>Consult your local Agricultural Officer.</li>";
+                document.getElementById('resAdv').innerText = "General Advice: Maintain field hygiene and ensure proper irrigation based on current weather.";
+            }
+            resDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="kn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ಕಿಸಾನ್ ಸೇತು - ನೋಂದಣಿ</title>
+    <style>
+        :root {
+            --primary: #1b5e20;
+            --secondary: #4caf50;
+            --bg: #f4f7f4;
+            --card: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 15px;
+        }
+
+        .reg-container {
+            background: var(--card);
+            width: 100%;
+            max-width: 420px;
+            padding: 35px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--primary);
+            margin: 10px 0;
+            font-size: 1.8rem;
+        }
+
+        p {
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+        }
+
+        .input-group {
+            text-align: left;
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #eee;
+            border-radius: 10px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--secondary);
+            outline: none;
+            background: #f9fff9;
+        }
+
+        .btn-register {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(27, 94, 32, 0.2);
+        }
+
+        .btn-register:hover {
+            background: #2e7d32;
+            transform: translateY(-2px);
+        }
+
+        .footer-note {
+            margin-top: 20px;
+            font-size: 0.75rem;
+            color: #999;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="reg-container">
+        <div style="font-size: 3rem;">🌾</div>
+        <h1>ಕಿಸಾನ್ ಸೇತು</h1>
+        <p>ಮುಂದುವರಿಯಲು ದಯವಿಟ್ಟು ನಿಮ್ಮ ವಿವರಗಳನ್ನು ಭರ್ತಿ ಮಾಡಿ</p>
+
+        <form id="regForm">
+            <div class="input-group">
+                <label>ರೈತರ ಹೆಸರು</label>
+                <input type="text" id="name" placeholder="ನಿಮ್ಮ ಪೂರ್ಣ ಹೆಸರು" required>
+            </div>
+
+            <div class="input-group">
+                <label>ವಯಸ್ಸು</label>
+                <input type="number" id="age" placeholder="ಉದಾ: 40" required min="18" max="100">
+            </div>
+
+            <div class="input-group">
+                <label>ಮೊಬೈಲ್ ಸಂಖ್ಯೆ</label>
+                <input type="tel" id="phone" placeholder="10 ಅಂಕಿಗಳ ಸಂಖ್ಯೆ" required pattern="[0-9]{10}">
+            </div>
+
+            <div class="input-group">
+                <label>ಜಮೀನಿನ ವಿಸ್ತೀರ್ಣ (ಎಕರೆಗಳಲ್ಲಿ)</label>
+                <input type="number" id="farmSize" step="0.1" placeholder="ಉದಾ: 5.0" required>
+            </div>
+
+            <button type="submit" class="btn-register">ನೋಂದಾಯಿಸಿ ಮತ್ತು ಮುಂದಕ್ಕೆ ಹೋಗಿ</button>
+        </form>
+
+        <div class="footer-note">ಸುರಕ್ಷಿತ ಕೃಷಿ ಮಾಹಿತಿ ಕೇಂದ್ರ</div>
+    </div>
+
+    <script>
+        document.getElementById('regForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            // Save data to localStorage
+            const data = {
+                name: document.getElementById('name').value,
+                age: document.getElementById('age').value,
+                phone: document.getElementById('phone').value,
+                farmSize: document.getElementById('farmSize').value
+            };
+            localStorage.setItem('farmerInfo', JSON.stringify(data));
+
+            // Redirect to det_kn.html
+            window.location.href = "det_kn.html";
+        });
+    </script>
+
+</body>
+
+</html>
